@@ -14,7 +14,172 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      analytics: {
+        Row: {
+          created_at: string
+          event: string
+          id: string
+          ip: string | null
+          meta: Json
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          event: string
+          id?: string
+          ip?: string | null
+          meta?: Json
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          event?: string
+          id?: string
+          ip?: string | null
+          meta?: Json
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "analytics_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payments: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          paystack_event_id: string | null
+          plan: Database["public"]["Enums"]["payment_plan"]
+          reference: string
+          status: Database["public"]["Enums"]["payment_status"]
+          user_id: string
+          verified_at: string | null
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          id?: string
+          paystack_event_id?: string | null
+          plan: Database["public"]["Enums"]["payment_plan"]
+          reference: string
+          status?: Database["public"]["Enums"]["payment_status"]
+          user_id: string
+          verified_at?: string | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          paystack_event_id?: string | null
+          plan?: Database["public"]["Enums"]["payment_plan"]
+          reference?: string
+          status?: Database["public"]["Enums"]["payment_status"]
+          user_id?: string
+          verified_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payments_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rate_limits: {
+        Row: {
+          count: number
+          ip: string
+          window_start: string
+        }
+        Insert: {
+          count?: number
+          ip: string
+          window_start?: string
+        }
+        Update: {
+          count?: number
+          ip?: string
+          window_start?: string
+        }
+        Relationships: []
+      }
+      referrals: {
+        Row: {
+          created_at: string
+          credited: boolean
+          id: string
+          payment_id: string | null
+          referred_user_id: string
+          referrer_code: string
+        }
+        Insert: {
+          created_at?: string
+          credited?: boolean
+          id?: string
+          payment_id?: string | null
+          referred_user_id: string
+          referrer_code: string
+        }
+        Update: {
+          created_at?: string
+          credited?: boolean
+          id?: string
+          payment_id?: string | null
+          referred_user_id?: string
+          referrer_code?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "referrals_payment_id_fkey"
+            columns: ["payment_id"]
+            isOneToOne: false
+            referencedRelation: "payments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "referrals_referred_user_id_fkey"
+            columns: ["referred_user_id"]
+            isOneToOne: true
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      users: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          ip: string | null
+          phone: string | null
+          referred_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          ip?: string | null
+          phone?: string | null
+          referred_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          ip?: string | null
+          phone?: string | null
+          referred_by?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +188,8 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      payment_plan: "reset" | "premium"
+      payment_status: "pending" | "success" | "failed"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +316,9 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      payment_plan: ["reset", "premium"],
+      payment_status: ["pending", "success", "failed"],
+    },
   },
 } as const
