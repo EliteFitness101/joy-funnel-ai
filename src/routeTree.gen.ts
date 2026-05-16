@@ -9,38 +9,208 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as VaultRouteImport } from './routes/vault'
+import { Route as UpgradeRouteImport } from './routes/upgrade'
+import { Route as SuccessRouteImport } from './routes/success'
+import { Route as CheckoutRouteImport } from './routes/checkout'
+import { Route as SplatRouteImport } from './routes/$'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ApiVerifyRouteImport } from './routes/api/verify'
+import { Route as ApiVaultRouteImport } from './routes/api/vault'
+import { Route as ApiTrackRouteImport } from './routes/api/track'
+import { Route as ApiCheckoutRouteImport } from './routes/api/checkout'
+import { Route as ApiPublicPaystackWebhookRouteImport } from './routes/api/public/paystack-webhook'
 
+const VaultRoute = VaultRouteImport.update({
+  id: '/vault',
+  path: '/vault',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UpgradeRoute = UpgradeRouteImport.update({
+  id: '/upgrade',
+  path: '/upgrade',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SuccessRoute = SuccessRouteImport.update({
+  id: '/success',
+  path: '/success',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CheckoutRoute = CheckoutRouteImport.update({
+  id: '/checkout',
+  path: '/checkout',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SplatRoute = SplatRouteImport.update({
+  id: '/$',
+  path: '/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiVerifyRoute = ApiVerifyRouteImport.update({
+  id: '/api/verify',
+  path: '/api/verify',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiVaultRoute = ApiVaultRouteImport.update({
+  id: '/api/vault',
+  path: '/api/vault',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiTrackRoute = ApiTrackRouteImport.update({
+  id: '/api/track',
+  path: '/api/track',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiCheckoutRoute = ApiCheckoutRouteImport.update({
+  id: '/api/checkout',
+  path: '/api/checkout',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicPaystackWebhookRoute =
+  ApiPublicPaystackWebhookRouteImport.update({
+    id: '/api/public/paystack-webhook',
+    path: '/api/public/paystack-webhook',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/$': typeof SplatRoute
+  '/checkout': typeof CheckoutRoute
+  '/success': typeof SuccessRoute
+  '/upgrade': typeof UpgradeRoute
+  '/vault': typeof VaultRoute
+  '/api/checkout': typeof ApiCheckoutRoute
+  '/api/track': typeof ApiTrackRoute
+  '/api/vault': typeof ApiVaultRoute
+  '/api/verify': typeof ApiVerifyRoute
+  '/api/public/paystack-webhook': typeof ApiPublicPaystackWebhookRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/$': typeof SplatRoute
+  '/checkout': typeof CheckoutRoute
+  '/success': typeof SuccessRoute
+  '/upgrade': typeof UpgradeRoute
+  '/vault': typeof VaultRoute
+  '/api/checkout': typeof ApiCheckoutRoute
+  '/api/track': typeof ApiTrackRoute
+  '/api/vault': typeof ApiVaultRoute
+  '/api/verify': typeof ApiVerifyRoute
+  '/api/public/paystack-webhook': typeof ApiPublicPaystackWebhookRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/$': typeof SplatRoute
+  '/checkout': typeof CheckoutRoute
+  '/success': typeof SuccessRoute
+  '/upgrade': typeof UpgradeRoute
+  '/vault': typeof VaultRoute
+  '/api/checkout': typeof ApiCheckoutRoute
+  '/api/track': typeof ApiTrackRoute
+  '/api/vault': typeof ApiVaultRoute
+  '/api/verify': typeof ApiVerifyRoute
+  '/api/public/paystack-webhook': typeof ApiPublicPaystackWebhookRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/$'
+    | '/checkout'
+    | '/success'
+    | '/upgrade'
+    | '/vault'
+    | '/api/checkout'
+    | '/api/track'
+    | '/api/vault'
+    | '/api/verify'
+    | '/api/public/paystack-webhook'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/$'
+    | '/checkout'
+    | '/success'
+    | '/upgrade'
+    | '/vault'
+    | '/api/checkout'
+    | '/api/track'
+    | '/api/vault'
+    | '/api/verify'
+    | '/api/public/paystack-webhook'
+  id:
+    | '__root__'
+    | '/'
+    | '/$'
+    | '/checkout'
+    | '/success'
+    | '/upgrade'
+    | '/vault'
+    | '/api/checkout'
+    | '/api/track'
+    | '/api/vault'
+    | '/api/verify'
+    | '/api/public/paystack-webhook'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  SplatRoute: typeof SplatRoute
+  CheckoutRoute: typeof CheckoutRoute
+  SuccessRoute: typeof SuccessRoute
+  UpgradeRoute: typeof UpgradeRoute
+  VaultRoute: typeof VaultRoute
+  ApiCheckoutRoute: typeof ApiCheckoutRoute
+  ApiTrackRoute: typeof ApiTrackRoute
+  ApiVaultRoute: typeof ApiVaultRoute
+  ApiVerifyRoute: typeof ApiVerifyRoute
+  ApiPublicPaystackWebhookRoute: typeof ApiPublicPaystackWebhookRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/vault': {
+      id: '/vault'
+      path: '/vault'
+      fullPath: '/vault'
+      preLoaderRoute: typeof VaultRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/upgrade': {
+      id: '/upgrade'
+      path: '/upgrade'
+      fullPath: '/upgrade'
+      preLoaderRoute: typeof UpgradeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/success': {
+      id: '/success'
+      path: '/success'
+      fullPath: '/success'
+      preLoaderRoute: typeof SuccessRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/checkout': {
+      id: '/checkout'
+      path: '/checkout'
+      fullPath: '/checkout'
+      preLoaderRoute: typeof CheckoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/$': {
+      id: '/$'
+      path: '/$'
+      fullPath: '/$'
+      preLoaderRoute: typeof SplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,11 +218,56 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/verify': {
+      id: '/api/verify'
+      path: '/api/verify'
+      fullPath: '/api/verify'
+      preLoaderRoute: typeof ApiVerifyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/vault': {
+      id: '/api/vault'
+      path: '/api/vault'
+      fullPath: '/api/vault'
+      preLoaderRoute: typeof ApiVaultRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/track': {
+      id: '/api/track'
+      path: '/api/track'
+      fullPath: '/api/track'
+      preLoaderRoute: typeof ApiTrackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/checkout': {
+      id: '/api/checkout'
+      path: '/api/checkout'
+      fullPath: '/api/checkout'
+      preLoaderRoute: typeof ApiCheckoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/paystack-webhook': {
+      id: '/api/public/paystack-webhook'
+      path: '/api/public/paystack-webhook'
+      fullPath: '/api/public/paystack-webhook'
+      preLoaderRoute: typeof ApiPublicPaystackWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  SplatRoute: SplatRoute,
+  CheckoutRoute: CheckoutRoute,
+  SuccessRoute: SuccessRoute,
+  UpgradeRoute: UpgradeRoute,
+  VaultRoute: VaultRoute,
+  ApiCheckoutRoute: ApiCheckoutRoute,
+  ApiTrackRoute: ApiTrackRoute,
+  ApiVaultRoute: ApiVaultRoute,
+  ApiVerifyRoute: ApiVerifyRoute,
+  ApiPublicPaystackWebhookRoute: ApiPublicPaystackWebhookRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
