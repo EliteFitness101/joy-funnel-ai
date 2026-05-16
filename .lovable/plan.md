@@ -1,108 +1,58 @@
-## ResoFlex™ Reset Funnel OS — Build Plan
+# Verify the Reset Funnel payment flow end-to-end
 
-A complete ₦1,000 entry → ₦3,000 upsell funnel with Paystack, Supabase, referrals, and vault delivery. Built on TanStack Start (same architecture as Next.js App Router — file-based routes + server functions for `/api/*`).
+Goal: confirm that a ₦1,000 Paystack test payment triggers `charge.success`, updates the Supabase `payments` row to `success`, and unlocks `/vault`. No new features in this step.
 
----
+## Prerequisites (you do these)
 
-### Pages (TanStack file routes)
+1. **Webhook URL** — In Paystack Dashboard → Settings → API Keys & Webhooks → **Test Webhook URL**, paste:
+   ```
+   https://project--0a16330a-44fd-4407-a95d-2c801d0d695b.lovable.app/api/public/paystack-webhook
+   ```
+   (Note: webhook must hit a stable URL, not the preview URL. We'll publish once before testing.)
 
-```
-/                  Landing (hero, offer, CTA → /checkout)
-/checkout          Email/phone capture → calls /api/checkout → redirect to Paystack
-/success           Verifies ref, shows ₦3,000 upsell ONLY, links to /vault
-/vault             Gated delivery: PDF links, meal plan, workouts, checklist
-/upgrade           ₦3,000 premium checkout (reuses same checkout API)
-/$                 Catch-all → redirect to /
-```
+2. **Confirm `PAYSTACK_SECRET_KEY`** is your **test** key (starts with `sk_test_`). It's already stored as a secret.
 
-Session restore: persist `{ user_id, email, ref, last_payment_ref }` in `localStorage`; restore on mount in root layout.
+3. **Publish the app** so the webhook URL is reachable — click Publish in the top-right.
 
----
+## Test steps (you run, I observe)
 
-### Supabase schema
+1. Open the published site → `/` → click CTA → `/checkout`
+2. Enter email + phone → submit → you're redirected to Paystack
+3. Use a Paystack test card:
+   - **Card**: `4084 0840 8408 4081`
+   - **Expiry**: any future date (e.g. `12/30`)
+   - **CVV**: `408`
+   - **PIN** (if asked): `0000`
+   - **OTP** (if asked): `123456`
+4. After success, Paystack redirects back to `/success`
+5. `/success` polls `/api/verify` → should flip to "paid" and reveal the upsell
+6. Click "Access Vault" → `/vault` should show the ₦1,000 plan assets unlocked
 
-```
-users         id (uuid pk), email (unique), phone, ip, referred_by, created_at
-payments      id, user_id, reference (unique), amount, plan ('reset'|'premium'),
-              status ('pending'|'success'|'failed'), paystack_event_id (unique),
-              created_at, verified_at
-referrals     id, referrer_user_id, referred_user_id (unique), payment_id,
-              credited (bool), created_at
-analytics     id, user_id (nullable), event (page_view|checkout_start|
-              payment_success|upsell_click|referral_conversion), meta jsonb, ip, created_at
-rate_limits   ip (pk), window_start, count
-```
+## What I'll check after you run the test
 
-RLS: enabled on all. `payments`, `referrals`, `analytics` writes via server functions using admin client only.
+- **Supabase `payments` row** — query for your reference, confirm `status = 'success'`, `verified_at` is set, `paystack_event_id` is populated.
+- **Supabase `users` row** — confirm your email is stored.
+- **`analytics` table** — confirm `payment_success` event was logged.
+- **Server logs** for `/api/public/paystack-webhook` — confirm HMAC verified and `charge.success` was processed (no idempotency duplicates).
+- **`/api/verify` response** for the reference — should return `paid: true`.
+- **`/api/vault`** entitlement check — should return the reset kit assets.
 
----
+## If anything fails
 
-### Server functions / API routes
+I'll pull the exact failure (signature mismatch, missing event, RLS block, etc.) from logs + DB and fix that specific issue — no scope creep.
 
-- `POST /api/checkout` (server route) — input: `{ email, plan, ref? }`. Creates/upserts user, applies rate limit (5/10min per IP via `rate_limits` upsert+count), generates unique `reference` (`rf_<plan>_<nanoid>`), inserts `payments` row as `pending`, returns Paystack `authorization_url` from `transaction/initialize`.
-- `POST /api/paystack/webhook` (server route, public) — verifies `x-paystack-signature` HMAC-SHA512 with `PAYSTACK_SECRET_KEY`. Accepts only `charge.success`. Idempotent: insert by `paystack_event_id` (unique) — duplicate = 200 noop. Updates payment to `success`, credits referral if applicable, logs analytics.
-- `GET /api/vault/verify` — confirms user has a `success` payment before serving vault content.
-- Tracking helper `logEvent()` used across pages.
+## Next step after this passes
 
----
+Once verified, you choose the expansion path:
+- `/api/health` + `devops_incidents` table
+- ChatB2K rules engine (pg_cron every 15 min reading analytics → writing recommendations)
+- TikTok hook / ad-copy generator (Lovable AI Gateway)
+- GitHub Actions + Vercel CI/CD setup doc (markdown deliverable, since CI/CD runs outside Lovable)
 
-### Referral logic
+I'll plan each separately so we don't overbuild.
 
-- Landing reads `?ref=<code>` → stores in `localStorage` + a cookie before checkout.
-- On checkout, `ref` is sent to `/api/checkout` and stored as `users.referred_by`.
-- On `charge.success` webhook, if user has `referred_by`, insert into `referrals` and mark `credited=true` (reward = future feature; structure ready).
+## Technical notes
 
----
-
-### Fraud / safety
-
-- IP rate limit table (ad-hoc, as agreed): 5 checkout inits per 10 min per IP.
-- Unique constraint on `payments.reference` → no duplicate references.
-- Unique constraint on `payments.paystack_event_id` → webhook replay protection.
-- Webhook signature verified before any DB write.
-- Webhook only processes `event === 'charge.success'`.
-
----
-
-### Tracking events
-
-Fired client-side to `/api/track`: `page_view`, `checkout_start`, `payment_success` (mirrored server-side from webhook), `upsell_click`, `referral_conversion`.
-
----
-
-### Secrets to add after approval
-
-- `PAYSTACK_SECRET_KEY` (sk_test_…)
-- `PAYSTACK_PUBLIC_KEY` (pk_test_…) — used client-side reference only, fine in code but stored as secret for parity
-
----
-
-### Vault delivery
-
-Placeholder PDF/asset URLs in `src/assets/vault/` (you'll swap with real files later). Vault page lists:
-- ResoFlex 7-Day Reset Kit PDF
-- Nigerian fat-loss meal plan PDF
-- 10-min home workouts PDF
-- Daily checklist PDF
-- Upgrade CTA → `/upgrade` for ₦3,000 premium (21-day plan, advanced workouts)
-
-Access logged in `analytics` (event=`vault_access`).
-
----
-
-### Design direction
-
-Bold wellness-meets-performance aesthetic: deep charcoal background, electric lime/emerald accent, large display serif for headlines (Instrument Serif) + clean sans body (Inter). Conversion-focused: single CTA per section, urgency timer on checkout, social proof strip on landing. Mobile-first (TikTok traffic).
-
----
-
-### Build order
-
-1. Enable Lovable Cloud + create schema migration
-2. Add `PAYSTACK_SECRET_KEY` + `PAYSTACK_PUBLIC_KEY` secrets
-3. Landing + checkout + success + vault + upgrade + catch-all routes
-4. `/api/checkout` + `/api/paystack/webhook` + `/api/track` server routes
-5. Referral capture + session restore
-6. Wire Paystack webhook URL: `https://<project>.lovable.app/api/paystack/webhook` (you paste into Paystack dashboard after first deploy)
-
-n8n integration is out of scope for v1 (no Lovable hook for it) — webhook is structured so n8n can subscribe to Supabase row inserts later.
+- The webhook route is `src/routes/api/public/paystack-webhook.ts` — already verifies HMAC-SHA512, filters to `charge.success`, dedupes on `paystack_event_id`.
+- Idempotency: `payments.reference` and `payments.paystack_event_id` both have unique constraints — a replayed webhook is a no-op insert conflict.
+- Rate limit (5/10min per IP) is enforced in `/api/checkout` via the `rate_limits` table.
