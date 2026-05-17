@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as VaultRouteImport } from './routes/vault'
 import { Route as UpgradeRouteImport } from './routes/upgrade'
 import { Route as SuccessRouteImport } from './routes/success'
+import { Route as StatusRouteImport } from './routes/status'
 import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as SplatRouteImport } from './routes/$'
 import { Route as IndexRouteImport } from './routes/index'
@@ -34,6 +35,11 @@ const UpgradeRoute = UpgradeRouteImport.update({
 const SuccessRoute = SuccessRouteImport.update({
   id: '/success',
   path: '/success',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StatusRoute = StatusRouteImport.update({
+  id: '/status',
+  path: '/status',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CheckoutRoute = CheckoutRouteImport.update({
@@ -82,6 +88,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/$': typeof SplatRoute
   '/checkout': typeof CheckoutRoute
+  '/status': typeof StatusRoute
   '/success': typeof SuccessRoute
   '/upgrade': typeof UpgradeRoute
   '/vault': typeof VaultRoute
@@ -95,6 +102,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/$': typeof SplatRoute
   '/checkout': typeof CheckoutRoute
+  '/status': typeof StatusRoute
   '/success': typeof SuccessRoute
   '/upgrade': typeof UpgradeRoute
   '/vault': typeof VaultRoute
@@ -109,6 +117,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/$': typeof SplatRoute
   '/checkout': typeof CheckoutRoute
+  '/status': typeof StatusRoute
   '/success': typeof SuccessRoute
   '/upgrade': typeof UpgradeRoute
   '/vault': typeof VaultRoute
@@ -124,6 +133,7 @@ export interface FileRouteTypes {
     | '/'
     | '/$'
     | '/checkout'
+    | '/status'
     | '/success'
     | '/upgrade'
     | '/vault'
@@ -137,6 +147,7 @@ export interface FileRouteTypes {
     | '/'
     | '/$'
     | '/checkout'
+    | '/status'
     | '/success'
     | '/upgrade'
     | '/vault'
@@ -150,6 +161,7 @@ export interface FileRouteTypes {
     | '/'
     | '/$'
     | '/checkout'
+    | '/status'
     | '/success'
     | '/upgrade'
     | '/vault'
@@ -164,6 +176,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   SplatRoute: typeof SplatRoute
   CheckoutRoute: typeof CheckoutRoute
+  StatusRoute: typeof StatusRoute
   SuccessRoute: typeof SuccessRoute
   UpgradeRoute: typeof UpgradeRoute
   VaultRoute: typeof VaultRoute
@@ -195,6 +208,13 @@ declare module '@tanstack/react-router' {
       path: '/success'
       fullPath: '/success'
       preLoaderRoute: typeof SuccessRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/status': {
+      id: '/status'
+      path: '/status'
+      fullPath: '/status'
+      preLoaderRoute: typeof StatusRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/checkout': {
@@ -260,6 +280,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   SplatRoute: SplatRoute,
   CheckoutRoute: CheckoutRoute,
+  StatusRoute: StatusRoute,
   SuccessRoute: SuccessRoute,
   UpgradeRoute: UpgradeRoute,
   VaultRoute: VaultRoute,
