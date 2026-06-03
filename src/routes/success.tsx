@@ -134,7 +134,7 @@ function ValidatingPanel({
       </div>
 
       <h1 className="mt-6 text-3xl md:text-4xl">
-        Verifying <span style={{ color: GOLD }}>Maria's</span> credentials
+        Maria — <span style={{ color: GOLD }}>Credentials Checked &amp; Validated</span>
       </h1>
       <p className="mt-2 text-sm text-neutral-400">
         Reference:{" "}
