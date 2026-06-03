@@ -44,6 +44,10 @@ function Success() {
       for (let i = 0; i < 8; i++) {
         try {
           const r = await fetch(`/api/verify?reference=${encodeURIComponent(ref)}`);
+          if (r.status === 429) {
+            await new Promise((r) => setTimeout(r, 3000));
+            continue;
+          }
           const j = await r.json();
           if (j.status === "success") {
             saveSession({
@@ -53,6 +57,10 @@ function Success() {
             track("payment_success", { plan: j.plan, reference: ref });
             clearInterval(stepTimer);
             setStatus("ok");
+            // Auto-redirect to external dashboard after reveal
+            setTimeout(() => {
+              window.location.href = "https://reso-dash.lovable.app";
+            }, 6000);
             return;
           }
         } catch {}
