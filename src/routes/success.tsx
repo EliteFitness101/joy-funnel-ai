@@ -117,7 +117,7 @@ function ValidatingPanel({
 }) {
   return (
     <div
-      className="rounded-3xl border bg-neutral-950 p-10"
+      className="rounded-3xl border bg-neutral-950/70 p-10 backdrop-blur-xl shadow-2xl"
       style={{ borderColor: `${GOLD}55` }}
     >
       <div className="flex items-center gap-3">
