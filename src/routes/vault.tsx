@@ -19,22 +19,31 @@ function Vault() {
 
   useEffect(() => {
     const s = loadSession();
-    if (!s.email) {
-      setState("locked");
+    const ref = s.last_reference;
+    const email = s.email;
+    if (!ref && !email) {
+      navigate({ to: "/status" });
       return;
     }
     (async () => {
-      const r = await fetch(`/api/vault?email=${encodeURIComponent(s.email!)}`);
-      const j = await r.json();
-      if (j.plans?.length) {
-        setData({ plans: j.plans, email: s.email });
-        setState("ok");
-        track("vault_access", { plans: j.plans });
-      } else {
-        setState("locked");
+      const qs = ref
+        ? `reference=${encodeURIComponent(ref)}`
+        : `email=${encodeURIComponent(email!)}`;
+      try {
+        const r = await fetch(`/api/vault?${qs}`);
+        const j = await r.json();
+        if (j.verified && j.plans?.length) {
+          setData({ plans: j.plans, email });
+          setState("ok");
+          track("vault_access", { plans: j.plans });
+        } else {
+          navigate({ to: "/status" });
+        }
+      } catch {
+        navigate({ to: "/status" });
       }
     })();
-  }, []);
+  }, [navigate]);
 
   if (state === "loading") {
     return <main className="flex min-h-screen items-center justify-center text-muted-foreground">Loading vault…</main>;

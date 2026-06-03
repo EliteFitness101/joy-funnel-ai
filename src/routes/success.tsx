@@ -44,6 +44,10 @@ function Success() {
       for (let i = 0; i < 8; i++) {
         try {
           const r = await fetch(`/api/verify?reference=${encodeURIComponent(ref)}`);
+          if (r.status === 429) {
+            await new Promise((r) => setTimeout(r, 3000));
+            continue;
+          }
           const j = await r.json();
           if (j.status === "success") {
             saveSession({
@@ -53,6 +57,10 @@ function Success() {
             track("payment_success", { plan: j.plan, reference: ref });
             clearInterval(stepTimer);
             setStatus("ok");
+            // Auto-redirect to external dashboard after reveal
+            setTimeout(() => {
+              window.location.href = "https://reso-dash.lovable.app";
+            }, 6000);
             return;
           }
         } catch {}
@@ -109,7 +117,7 @@ function ValidatingPanel({
 }) {
   return (
     <div
-      className="rounded-3xl border bg-neutral-950 p-10"
+      className="rounded-3xl border bg-neutral-950/70 p-10 backdrop-blur-xl shadow-2xl"
       style={{ borderColor: `${GOLD}55` }}
     >
       <div className="flex items-center gap-3">
@@ -126,7 +134,7 @@ function ValidatingPanel({
       </div>
 
       <h1 className="mt-6 text-3xl md:text-4xl">
-        Verifying <span style={{ color: GOLD }}>Maria's</span> credentials
+        Maria — <span style={{ color: GOLD }}>Credentials Checked &amp; Validated</span>
       </h1>
       <p className="mt-2 text-sm text-neutral-400">
         Reference:{" "}
