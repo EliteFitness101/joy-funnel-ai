@@ -49,6 +49,50 @@ export type Database = {
           },
         ]
       }
+      entitlements: {
+        Row: {
+          access_granted: boolean
+          created_at: string
+          id: string
+          payment_id: string | null
+          plan: string
+          revoked_at: string | null
+          rsid: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          access_granted?: boolean
+          created_at?: string
+          id?: string
+          payment_id?: string | null
+          plan: string
+          revoked_at?: string | null
+          rsid: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          access_granted?: boolean
+          created_at?: string
+          id?: string
+          payment_id?: string | null
+          plan?: string
+          revoked_at?: string | null
+          rsid?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "entitlements_payment_id_fkey"
+            columns: ["payment_id"]
+            isOneToOne: false
+            referencedRelation: "payments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       payments: {
         Row: {
           amount: number
@@ -57,6 +101,7 @@ export type Database = {
           paystack_event_id: string | null
           plan: Database["public"]["Enums"]["payment_plan"]
           reference: string
+          rsid: string | null
           status: Database["public"]["Enums"]["payment_status"]
           user_id: string
           verified_at: string | null
@@ -68,6 +113,7 @@ export type Database = {
           paystack_event_id?: string | null
           plan: Database["public"]["Enums"]["payment_plan"]
           reference: string
+          rsid?: string | null
           status?: Database["public"]["Enums"]["payment_status"]
           user_id: string
           verified_at?: string | null
@@ -79,6 +125,7 @@ export type Database = {
           paystack_event_id?: string | null
           plan?: Database["public"]["Enums"]["payment_plan"]
           reference?: string
+          rsid?: string | null
           status?: Database["public"]["Enums"]["payment_status"]
           user_id?: string
           verified_at?: string | null
