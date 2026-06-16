@@ -1,0 +1,33 @@
+name: Deploy Notify (make.com)
+
+# Fires on every push to main AFTER Vercel's GitHub integration starts the build.
+# Posts commit metadata to the make.com webhook so your scenario can chain
+# Slack/Discord/Notion/Paystack-status updates automatically.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping make.com webhook
+        run: |
+          curl -fsS -X POST "https://hook.eu1.make.com/p0c26asklninfrxhp2sw6nkdjjb19a89" \
+            -H "Content-Type: application/json" \
+            -d @- <<EOF
+          {
+            "event": "vercel_deploy_triggered",
+            "repo": "${{ github.repository }}",
+            "ref": "${{ github.ref_name }}",
+            "sha": "${{ github.sha }}",
+            "short_sha": "${GITHUB_SHA::7}",
+            "actor": "${{ github.actor }}",
+            "commit_message": ${{ toJSON(github.event.head_commit.message) }},
+            "commit_url": "${{ github.event.head_commit.url }}",
+            "timestamp": "${{ github.event.head_commit.timestamp }}",
+            "target_domain": "https://reset.resofit.fit"
+          }
+          EOF
