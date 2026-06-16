@@ -41,12 +41,15 @@ export const Route = createFileRoute("/api/public/webhook")({
 
           if (payment && payment.status !== "success") {
             if (payment.amount === amountNaira) {
+              const { randomBytes } = await import("crypto");
+              const rsid = `rsid_${randomBytes(16).toString("base64url")}`;
               const { error: updateError } = await supabaseAdmin
                 .from("payments")
                 .update({
                   status: "success",
                   paystack_event_id: eventId,
                   verified_at: new Date().toISOString(),
+                  rsid,
                 })
                 .eq("id", payment.id);
 
