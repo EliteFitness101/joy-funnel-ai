@@ -4,10 +4,17 @@ import { supabaseAdmin } from "@/integrations/supabase/client.server";
 const ALLOWED = new Set([
   "page_view",
   "checkout_start",
+  "payment_attempt",
   "payment_success",
   "upsell_click",
+  "upsell_view",
+  "crosssell_click",
   "referral_conversion",
   "vault_access",
+  "click",
+  "scroll_depth",
+  "exit_intent",
+  "session_end",
 ]);
 
 export const Route = createFileRoute("/api/track")({

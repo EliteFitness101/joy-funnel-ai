@@ -63,6 +63,10 @@ export const Route = createFileRoute("/api/public/paystack-webhook")({
           return new Response("amount mismatch", { status: 200 });
         }
 
+        // Mint RSID (Resonance Session ID) — issued ONLY after verified payment.
+        const { randomBytes } = await import("crypto");
+        const rsid = `rsid_${randomBytes(16).toString("base64url")}`;
+
         // Mark success atomically with event id (unique constraint = replay protection)
         const { error: upErr } = await supabaseAdmin
           .from("payments")
@@ -70,12 +74,22 @@ export const Route = createFileRoute("/api/public/paystack-webhook")({
             status: "success",
             paystack_event_id: eventId,
             verified_at: new Date().toISOString(),
+            rsid,
           })
           .eq("id", payment.id);
         if (upErr) {
           // Unique violation = concurrent webhook already processed
           return new Response("ok", { status: 200 });
         }
+
+        // Grant entitlement (DB is the only source of access truth).
+        await supabaseAdmin.from("entitlements").insert({
+          user_id: payment.user_id,
+          payment_id: payment.id,
+          rsid,
+          plan: payment.plan,
+          access_granted: true,
+        });
 
         // Credit referral if user was referred and not yet credited
         const { data: user } = await supabaseAdmin

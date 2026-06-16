@@ -41,12 +41,15 @@ export const Route = createFileRoute("/api/public/webhook")({
 
           if (payment && payment.status !== "success") {
             if (payment.amount === amountNaira) {
+              const { randomBytes } = await import("crypto");
+              const rsid = `rsid_${randomBytes(16).toString("base64url")}`;
               const { error: updateError } = await supabaseAdmin
                 .from("payments")
                 .update({
                   status: "success",
                   paystack_event_id: eventId,
                   verified_at: new Date().toISOString(),
+                  rsid,
                 })
                 .eq("id", payment.id);
 
@@ -65,6 +68,14 @@ export const Route = createFileRoute("/api/public/webhook")({
                     credited: true,
                   });
                 }
+
+                await supabaseAdmin.from("entitlements").insert({
+                  user_id: payment.user_id,
+                  payment_id: payment.id,
+                  rsid,
+                  plan: payment.plan,
+                  access_granted: true,
+                });
 
                 await supabaseAdmin.from("analytics").insert({
                   user_id: payment.user_id,
