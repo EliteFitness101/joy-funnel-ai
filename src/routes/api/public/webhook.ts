@@ -69,6 +69,14 @@ export const Route = createFileRoute("/api/public/webhook")({
                   });
                 }
 
+                await supabaseAdmin.from("entitlements").insert({
+                  user_id: payment.user_id,
+                  payment_id: payment.id,
+                  rsid,
+                  plan: payment.plan,
+                  access_granted: true,
+                });
+
                 await supabaseAdmin.from("analytics").insert({
                   user_id: payment.user_id,
                   event: "payment_success",

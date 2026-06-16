@@ -14,9 +14,24 @@ export const Route = createFileRoute("/api/vault")({
 
         const url = new URL(request.url);
         const reference = url.searchParams.get("reference");
+        const rsid = url.searchParams.get("rsid");
         const email = (url.searchParams.get("email") ?? "").toLowerCase();
 
-        // Preferred path: gate by verified paystack reference (no PII required client-side)
+        // Preferred path: gate by RSID (issued only after verified payment).
+        if (rsid) {
+          if (rsid.length > 128 || !/^rsid_[A-Za-z0-9_-]+$/.test(rsid)) {
+            return Response.json({ plans: [], verified: false }, { status: 400 });
+          }
+          const { data: ents } = await supabaseAdmin
+            .from("entitlements")
+            .select("plan, access_granted")
+            .eq("rsid", rsid)
+            .eq("access_granted", true);
+          const plans = Array.from(new Set((ents ?? []).map((e) => e.plan)));
+          return Response.json({ plans, verified: plans.length > 0 });
+        }
+
+        // Fallback: gate by verified paystack reference (no PII required client-side)
         if (reference) {
           if (reference.length > 128 || !/^[A-Za-z0-9_-]+$/.test(reference)) {
             return Response.json({ plans: [], verified: false }, { status: 400 });
