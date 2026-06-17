@@ -1,33 +1,119 @@
-name: Deploy Notify (make.com)
+name: Deploy Notify + Smoke Test
 
-# Fires on every push to main AFTER Vercel's GitHub integration starts the build.
-# Posts commit metadata to the make.com webhook so your scenario can chain
-# Slack/Discord/Notion/Paystack-status updates automatically.
+# Fires on every push. Production smoke test runs only on `main` AFTER Vercel
+# has had time to build & promote. Preview branches deploy automatically via
+# Vercel's GitHub integration (preview URL: <branch>--<project>.vercel.app)
+# and DO NOT touch the production domain — promote manually in Vercel when
+# you're ready.
 
 on:
   push:
+    branches: [main, "preview/**", staging]
+  pull_request:
     branches: [main]
   workflow_dispatch:
 
 jobs:
   notify:
+    name: Notify make.com (HMAC-signed)
     runs-on: ubuntu-latest
     steps:
-      - name: Ping make.com webhook
+      - name: Build signed payload and POST to make.com
+        env:
+          MAKE_WEBHOOK_URL: https://hook.eu1.make.com/p0c26asklninfrxhp2sw6nkdjjb19a89
+          # Add this as a GitHub repo secret: Settings → Secrets → Actions → New
+          # repository secret → name: MAKE_WEBHOOK_SECRET. Put the same value in
+          # your make.com scenario's "Verify signature" step so only signed
+          # requests trigger automation.
+          MAKE_WEBHOOK_SECRET: ${{ secrets.MAKE_WEBHOOK_SECRET }}
+          COMMIT_MSG: ${{ github.event.head_commit.message }}
+          COMMIT_URL: ${{ github.event.head_commit.url }}
+          TIMESTAMP: ${{ github.event.head_commit.timestamp }}
         run: |
-          curl -fsS -X POST "https://hook.eu1.make.com/p0c26asklninfrxhp2sw6nkdjjb19a89" \
+          if [ -z "$MAKE_WEBHOOK_SECRET" ]; then
+            echo "::warning::MAKE_WEBHOOK_SECRET is not set — skipping signed notify."
+            exit 0
+          fi
+          # Determine target env
+          if [ "${{ github.ref }}" = "refs/heads/main" ]; then
+            ENV="production"
+            DOMAIN="https://reset.resofit.fit"
+          else
+            ENV="preview"
+            DOMAIN="https://${{ github.ref_name }}--resofit.vercel.app"
+          fi
+          PAYLOAD=$(jq -nc \
+            --arg event "vercel_deploy_triggered" \
+            --arg env "$ENV" \
+            --arg repo "${{ github.repository }}" \
+            --arg ref "${{ github.ref_name }}" \
+            --arg sha "${{ github.sha }}" \
+            --arg short_sha "${GITHUB_SHA::7}" \
+            --arg actor "${{ github.actor }}" \
+            --arg commit_message "$COMMIT_MSG" \
+            --arg commit_url "$COMMIT_URL" \
+            --arg timestamp "$TIMESTAMP" \
+            --arg target_domain "$DOMAIN" \
+            '{event:$event, env:$env, repo:$repo, ref:$ref, sha:$sha, short_sha:$short_sha, actor:$actor, commit_message:$commit_message, commit_url:$commit_url, timestamp:$timestamp, target_domain:$target_domain}')
+          # HMAC-SHA256 over the exact JSON body
+          SIG=$(printf '%s' "$PAYLOAD" | openssl dgst -sha256 -hmac "$MAKE_WEBHOOK_SECRET" -hex | awk '{print $2}')
+          echo "Posting signed payload to make.com (env=$ENV)"
+          curl -fsS -X POST "$MAKE_WEBHOOK_URL" \
             -H "Content-Type: application/json" \
-            -d @- <<EOF
-          {
-            "event": "vercel_deploy_triggered",
-            "repo": "${{ github.repository }}",
-            "ref": "${{ github.ref_name }}",
-            "sha": "${{ github.sha }}",
-            "short_sha": "${GITHUB_SHA::7}",
-            "actor": "${{ github.actor }}",
-            "commit_message": ${{ toJSON(github.event.head_commit.message) }},
-            "commit_url": "${{ github.event.head_commit.url }}",
-            "timestamp": "${{ github.event.head_commit.timestamp }}",
-            "target_domain": "https://reset.resofit.fit"
-          }
-          EOF
+            -H "X-Signature: sha256=$SIG" \
+            -H "X-Signature-Timestamp: $(date -u +%s)" \
+            --data "$PAYLOAD"
+
+  smoke_test_production:
+    name: Smoke test (production)
+    needs: notify
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wait for Vercel to promote
+        run: |
+          echo "Waiting 90s for Vercel build + promotion..."
+          for i in 1 2 3 4 5 6 7 8 9; do sleep 10; echo "  ...${i}0s"; done
+
+      - name: Hit /api/checkout on reset.resofit.fit
+        run: |
+          URL="https://reset.resofit.fit/api/checkout"
+          echo "POST $URL"
+          # Intentionally invalid payload — we only need to prove the route is
+          # reachable and the server bundle is live. A live route returns 400
+          # (validation) or 429 (rate-limited). 404 = adapter misconfigured.
+          HTTP=$(curl -sS -o /tmp/body -w "%{http_code}" \
+            -X POST "$URL" \
+            -H "Content-Type: application/json" \
+            --data '{"smoke":"test"}')
+          echo "HTTP $HTTP"
+          cat /tmp/body || true
+          echo
+          if [ "$HTTP" = "404" ]; then
+            echo "::error::/api/checkout returned 404 — Vercel adapter is not active. See DEPLOY.md §1c."
+            exit 1
+          fi
+          if [ "$HTTP" -ge 500 ]; then
+            echo "::error::/api/checkout returned $HTTP — server error."
+            exit 1
+          fi
+          echo "✅ API routes live on reset.resofit.fit (status $HTTP)"
+
+      - name: Notify make.com — smoke test result
+        if: always()
+        env:
+          MAKE_WEBHOOK_URL: https://hook.eu1.make.com/p0c26asklninfrxhp2sw6nkdjjb19a89
+          MAKE_WEBHOOK_SECRET: ${{ secrets.MAKE_WEBHOOK_SECRET }}
+        run: |
+          if [ -z "$MAKE_WEBHOOK_SECRET" ]; then exit 0; fi
+          PAYLOAD=$(jq -nc \
+            --arg event "smoke_test_complete" \
+            --arg status "${{ job.status }}" \
+            --arg sha "${{ github.sha }}" \
+            --arg target "https://reset.resofit.fit/api/checkout" \
+            '{event:$event, status:$status, sha:$sha, target:$target}')
+          SIG=$(printf '%s' "$PAYLOAD" | openssl dgst -sha256 -hmac "$MAKE_WEBHOOK_SECRET" -hex | awk '{print $2}')
+          curl -fsS -X POST "$MAKE_WEBHOOK_URL" \
+            -H "Content-Type: application/json" \
+            -H "X-Signature: sha256=$SIG" \
+            --data "$PAYLOAD" || true
