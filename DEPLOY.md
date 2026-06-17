@@ -99,3 +99,64 @@ After adding/changing any variable: **Deployments → ⋯ → Redeploy** (env va
 ## 4. Rollback
 
 Vercel → Deployments → pick the last green deploy → **⋯ → Promote to Production**. Instant, no rebuild.
+
+---
+
+## 5. Staging / Preview deployments
+
+Vercel auto-deploys **every branch and every PR** that isn't `main` as a
+preview, with its own unique URL like `resofit-git-<branch>-<team>.vercel.app`.
+Production (`reset.resofit.fit`) is only updated when `main` is pushed.
+
+Recommended flow:
+
+```
+feature/* ──▶ open PR ──▶ Vercel preview URL posted in PR ──▶ review
+                            │
+                            ▼
+                       merge to main ──▶ auto-promote to reset.resofit.fit
+```
+
+Per-env knobs you can set in **Vercel → Settings → Environment Variables**:
+- Mark sensitive vars as **Production only** so previews can't leak secrets.
+- Set `APP_URL=https://$VERCEL_URL` on the **Preview** scope so OAuth/callbacks
+  resolve to the preview origin instead of `reset.resofit.fit`.
+
+To **block auto-promotion** and require manual approval for production:
+Vercel → Project → **Settings → Git → Production Branch** → enable
+**"Require approval for production deployments"** (Pro plan).
+
+---
+
+## 6. Make.com webhook signature verification
+
+GitHub Actions now signs every webhook body with HMAC-SHA256 and sends the
+digest in the `X-Signature: sha256=<hex>` header. To complete the loop:
+
+1. Generate a shared secret:
+   ```bash
+   openssl rand -hex 32
+   ```
+2. Add it as a **GitHub repo secret** → Settings → Secrets and variables →
+   Actions → New repository secret → name `MAKE_WEBHOOK_SECRET`.
+3. In make.com, add a **Tools → Set variable** step that recomputes the HMAC
+   over the raw body using the same secret, then a **Router → Filter** that
+   only continues when `{{X-Signature}} == "sha256=" + {{computed}}`.
+   Any request without a matching signature is dropped — only signed
+   GitHub-triggered events (i.e. Paystack-verified deploys) run automation.
+
+---
+
+## 7. Post-deploy smoke test
+
+The `Smoke test (production)` job in
+`.github/workflows/deploy-notify.yml` runs after every `main` push:
+
+1. Waits 90s for Vercel to finish building.
+2. `POST https://reset.resofit.fit/api/checkout` with a junk body.
+3. Asserts the response is **not 404** (which would mean the Vercel adapter
+   is misconfigured) and **not 5xx**. A 400 / 429 = healthy.
+4. Pings make.com with the smoke-test result (also HMAC-signed).
+
+To run it manually: GitHub → Actions → **Deploy Notify + Smoke Test** →
+**Run workflow**.
