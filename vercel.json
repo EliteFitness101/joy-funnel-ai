@@ -3,7 +3,7 @@
   "framework": null,
   "buildCommand": "bun run build",
   "installCommand": "bun install",
-  "outputDirectory": ".vercel/output",
+  "outputDirectory": ".dist",
   "regions": ["fra1"],
   "github": {
     "silent": false,
