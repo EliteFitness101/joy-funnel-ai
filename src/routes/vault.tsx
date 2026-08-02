@@ -1,6 +1,11 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { loadSession, track } from "@/lib/funnel";
+import { BrandedLoader } from "@/components/premium/BrandedLoader";
+import { EmptyState } from "@/components/premium/States";
+import { LuxeCard, LuxeCardMeta, LuxeCardTitle } from "@/components/premium/LuxeCard";
+
+
 
 export const Route = createFileRoute("/vault")({
   head: () => ({ meta: [{ title: "Your Vault — ResoFlex" }] }),
@@ -46,41 +51,54 @@ function Vault() {
   }, [navigate]);
 
   if (state === "loading") {
-    return <main className="flex min-h-screen items-center justify-center text-muted-foreground">Loading vault…</main>;
+    return (
+      <main>
+        <BrandedLoader
+          messages={[
+            "Authenticating your Resonance session…",
+            "Decrypting your vault keys…",
+            "Assembling your personalised kit…",
+          ]}
+        />
+      </main>
+    );
   }
 
   if (state === "locked") {
     return (
-      <main className="flex min-h-screen items-center justify-center px-6">
-        <div className="max-w-md text-center">
-          <h1 className="text-4xl">Vault locked</h1>
-          <p className="mt-3 text-muted-foreground">
-            You need to complete payment to access your Reset Kit.
-          </p>
-          <button
-            onClick={() => navigate({ to: "/checkout" })}
-            className="mt-6 rounded-full bg-primary px-6 py-3 font-semibold text-primary-foreground"
-          >
-            Get the Kit — ₦1,000
-          </button>
+      <main className="flex min-h-screen items-center justify-center px-5 py-16">
+        <div className="w-full max-w-md">
+          <EmptyState
+            title="Vault locked"
+            body="Complete your ₦1,000 payment and your Reset Kit unlocks here instantly."
+            action={
+              <button
+                onClick={() => navigate({ to: "/checkout" })}
+                className="luxe-ripple rounded-full bg-primary px-6 py-3 font-semibold text-primary-foreground"
+              >
+                Get the Kit — ₦1,000
+              </button>
+            }
+          />
         </div>
       </main>
     );
   }
 
+
   const isPremium = data.plans.includes("premium");
 
   return (
-    <main className="min-h-screen px-6 py-12">
+    <main className="luxe-gradient-bg min-h-screen px-5 pb-28 pt-10 sm:px-6 md:pb-16">
       <div className="mx-auto max-w-3xl">
-        <div className="flex items-center justify-between">
-          <Link to="/" className="text-sm text-muted-foreground">← home</Link>
-          <span className="text-xs uppercase tracking-widest text-primary">
+        <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
+          <Link to="/" className="truncate text-sm text-muted-foreground">← home</Link>
+          <span className="shrink-0 rounded-full border border-primary/40 bg-primary/10 px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-primary">
             {isPremium ? "Premium · Unlocked" : "Reset · Unlocked"}
           </span>
         </div>
-        <h1 className="mt-6 text-5xl md:text-6xl">
-          Your <span className="italic text-primary">Vault</span>
+        <h1 className="luxe-rise mt-6 text-5xl md:text-6xl">
+          Your <span className="italic text-primary luxe-glow">Vault</span>
         </h1>
         <p className="mt-2 text-muted-foreground">
           Logged in as {data.email}. Open files on your phone or download.
@@ -94,7 +112,7 @@ function Vault() {
 
           {isPremium && (
             <>
-              <div className="mt-6 text-xs uppercase tracking-widest text-primary">Premium</div>
+              <div className="mt-6 text-xs uppercase tracking-[0.22em] text-primary">Premium</div>
               <VaultItem title="21-Day Transformation Plan" sub="Structured 3-week system" href="#21day" />
               <VaultItem title="Advanced Workouts" sub="HIIT + resistance progressions" href="#advanced" />
               <VaultItem title="Faster Results System" sub="Weekly tracker + nutrition rules" href="#system" />
@@ -103,19 +121,20 @@ function Vault() {
         </section>
 
         {!isPremium && (
-          <div className="mt-12 rounded-2xl border border-primary/30 bg-card p-6">
-            <h3 className="text-2xl">Ready for faster results?</h3>
-            <p className="mt-2 text-sm text-muted-foreground">
+          <LuxeCard className="mt-12">
+            <LuxeCardTitle>Ready for faster results?</LuxeCardTitle>
+            <LuxeCardMeta>
               Unlock the 21-day Premium Transformation for ₦3,000.
-            </p>
+            </LuxeCardMeta>
             <Link
               to="/upgrade"
+              data-track="vault-upsell"
               onClick={() => track("upsell_click", { plan: "premium", from: "vault" })}
-              className="mt-4 inline-block rounded-full bg-primary px-6 py-3 font-semibold text-primary-foreground"
+              className="luxe-ripple mt-5 inline-block rounded-full bg-primary px-6 py-3 font-semibold text-primary-foreground"
             >
               Upgrade for faster results
             </Link>
-          </div>
+          </LuxeCard>
         )}
       </div>
     </main>
@@ -126,13 +145,15 @@ function VaultItem({ title, sub, href }: { title: string; sub: string; href: str
   return (
     <a
       href={href}
-      className="flex items-center justify-between rounded-2xl border border-border bg-card p-5 transition hover:border-primary/60"
+      data-track={`vault-item:${title}`}
+      className="luxe-card luxe-border-anim flex items-center justify-between gap-4 !p-5"
     >
-      <div>
-        <div className="font-semibold">{title}</div>
-        <div className="text-sm text-muted-foreground">{sub}</div>
+      <div className="min-w-0">
+        <div className="truncate font-semibold">{title}</div>
+        <div className="truncate text-sm text-muted-foreground">{sub}</div>
       </div>
-      <span className="text-primary">↓</span>
+      <span className="shrink-0 text-primary">↓</span>
     </a>
+
   );
 }

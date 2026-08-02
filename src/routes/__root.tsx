@@ -11,6 +11,9 @@ import { useEffect } from "react";
 
 import appCss from "../styles.css?url";
 import { captureRefFromUrl, track } from "@/lib/funnel";
+import { installBehaviorSignals } from "@/lib/behavior";
+import { MobileBottomNav } from "@/components/premium/MobileNav";
+
 
 function NotFoundComponent() {
   return (
@@ -103,11 +106,14 @@ function RootComponent() {
   useEffect(() => {
     captureRefFromUrl();
     track("page_view", { path: window.location.pathname });
+    return installBehaviorSignals({ page: window.location.pathname });
   }, []);
 
   return (
     <QueryClientProvider client={queryClient}>
       <Outlet />
+      <MobileBottomNav />
     </QueryClientProvider>
   );
 }
+
