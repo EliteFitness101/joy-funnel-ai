@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 import { loadSession, track } from "@/lib/funnel";
 import { BrandedLoader } from "@/components/premium/BrandedLoader";
 import { EmptyState } from "@/components/premium/States";
+import { LuxeCard, LuxeCardMeta, LuxeCardTitle } from "@/components/premium/LuxeCard";
+
 
 
 export const Route = createFileRoute("/vault")({
