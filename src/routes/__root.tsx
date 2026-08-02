@@ -11,6 +11,9 @@ import { useEffect } from "react";
 
 import appCss from "../styles.css?url";
 import { captureRefFromUrl, track } from "@/lib/funnel";
+import { installBehaviorSignals } from "@/lib/behavior";
+import { MobileBottomNav } from "@/components/premium/MobileNav";
+
 
 function NotFoundComponent() {
   return (
