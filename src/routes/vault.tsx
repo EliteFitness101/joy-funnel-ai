@@ -1,6 +1,9 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { loadSession, track } from "@/lib/funnel";
+import { BrandedLoader } from "@/components/premium/BrandedLoader";
+import { EmptyState } from "@/components/premium/States";
+
 
 export const Route = createFileRoute("/vault")({
   head: () => ({ meta: [{ title: "Your Vault — ResoFlex" }] }),
