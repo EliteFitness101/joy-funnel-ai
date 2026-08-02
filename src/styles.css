@@ -71,3 +71,296 @@
     letter-spacing: -0.02em;
   }
 }
+
+/* ============================================================
+   PREMIUM DESIGN SYSTEM — Industrial Luxe (frontend only)
+   Section themes: apply as a class on any wrapper element.
+   ============================================================ */
+
+@theme inline {
+  --color-luxe: var(--luxe);
+  --color-luxe-soft: var(--luxe-soft);
+  --color-surface: var(--surface);
+}
+
+:root {
+  --luxe: oklch(0.8 0.13 88); /* industrial gold #D4AF37 family */
+  --luxe-soft: oklch(0.8 0.13 88 / 0.14);
+  --surface: oklch(0.19 0.012 240 / 0.62);
+  --luxe-shadow: 0 24px 60px -24px oklch(0.8 0.13 88 / 0.35);
+}
+
+/* Section themes — automatic switching by section wrapper */
+.theme-noir-gold {
+  --primary: oklch(0.8 0.13 88);
+  --primary-foreground: oklch(0.14 0 0);
+  --luxe: oklch(0.8 0.13 88);
+  --luxe-soft: oklch(0.8 0.13 88 / 0.14);
+  --background: oklch(0.14 0 0);
+  --surface: oklch(0.19 0.004 240 / 0.6);
+  --border: oklch(0.32 0.02 90 / 0.5);
+}
+.theme-rose-ivory {
+  --primary: oklch(0.78 0.09 30);
+  --primary-foreground: oklch(0.18 0.01 30);
+  --luxe: oklch(0.82 0.08 30);
+  --luxe-soft: oklch(0.82 0.08 30 / 0.14);
+  --surface: oklch(0.24 0.02 30 / 0.55);
+  --border: oklch(0.4 0.05 30 / 0.45);
+}
+.theme-emerald-obsidian {
+  --primary: oklch(0.78 0.15 160);
+  --primary-foreground: oklch(0.14 0.01 160);
+  --luxe: oklch(0.8 0.12 160);
+  --luxe-soft: oklch(0.8 0.12 160 / 0.14);
+  --surface: oklch(0.2 0.02 160 / 0.55);
+  --border: oklch(0.38 0.05 160 / 0.45);
+}
+.theme-sapphire-white {
+  --primary: oklch(0.72 0.15 255);
+  --primary-foreground: oklch(0.98 0.005 255);
+  --luxe: oklch(0.78 0.12 255);
+  --luxe-soft: oklch(0.78 0.12 255 / 0.14);
+  --surface: oklch(0.22 0.02 255 / 0.55);
+  --border: oklch(0.4 0.05 255 / 0.45);
+}
+.theme-platinum-black {
+  --primary: oklch(0.9 0.005 240);
+  --primary-foreground: oklch(0.14 0 0);
+  --luxe: oklch(0.92 0.005 240);
+  --luxe-soft: oklch(0.92 0.005 240 / 0.12);
+  --surface: oklch(0.2 0 0 / 0.6);
+  --border: oklch(0.42 0 0 / 0.45);
+}
+
+/* ---- Utilities ---- */
+@utility luxe-glass {
+  background: var(--surface);
+  backdrop-filter: blur(16px) saturate(140%);
+  border: 1px solid var(--border);
+}
+
+@utility luxe-shadow {
+  box-shadow: var(--luxe-shadow);
+}
+
+@utility luxe-card {
+  position: relative;
+  border-radius: 1.5rem;
+  background: var(--surface);
+  backdrop-filter: blur(16px) saturate(140%);
+  border: 1px solid var(--border);
+  transition:
+    transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.35s ease;
+  will-change: transform;
+  &:hover {
+    transform: translateY(-4px);
+    border-color: color-mix(in oklab, var(--luxe) 55%, transparent);
+    box-shadow: var(--luxe-shadow);
+  }
+}
+
+@utility luxe-border-anim {
+  &::before {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(
+      120deg,
+      transparent 20%,
+      color-mix(in oklab, var(--luxe) 70%, transparent) 50%,
+      transparent 80%
+    );
+    background-size: 250% 100%;
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    mask-composite: exclude;
+    -webkit-mask-composite: xor;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+  }
+  &:hover::before {
+    opacity: 1;
+    animation: luxe-border-sweep 2.2s linear infinite;
+  }
+}
+
+@utility luxe-glow {
+  text-shadow: 0 0 22px color-mix(in oklab, var(--luxe) 45%, transparent);
+}
+
+@utility luxe-shimmer {
+  position: relative;
+  overflow: hidden;
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      100deg,
+      transparent 20%,
+      color-mix(in oklab, var(--luxe) 22%, transparent) 45%,
+      transparent 70%
+    );
+    background-size: 220% 100%;
+    animation: luxe-shimmer-sweep 1.6s ease-in-out infinite;
+  }
+}
+
+@utility luxe-ripple {
+  position: relative;
+  overflow: hidden;
+  &::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 12px;
+    height: 12px;
+    border-radius: 9999px;
+    background: color-mix(in oklab, var(--primary-foreground) 45%, transparent);
+    transform: translate(-50%, -50%) scale(0);
+    opacity: 0;
+  }
+  &:active::after {
+    animation: luxe-ripple-out 0.6s ease-out;
+  }
+}
+
+@utility luxe-float {
+  animation: luxe-float-y 5s ease-in-out infinite;
+}
+
+@utility luxe-rise {
+  animation: luxe-rise-in 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@utility luxe-slide {
+  animation: luxe-slide-in 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@utility luxe-gradient-bg {
+  background-image: radial-gradient(
+      120% 80% at 10% 0%,
+      color-mix(in oklab, var(--luxe) 12%, transparent) 0%,
+      transparent 60%
+    ),
+    radial-gradient(
+      90% 70% at 100% 100%,
+      color-mix(in oklab, var(--luxe) 8%, transparent) 0%,
+      transparent 55%
+    );
+}
+
+@keyframes luxe-border-sweep {
+  to {
+    background-position: 250% 0;
+  }
+}
+@keyframes luxe-shimmer-sweep {
+  0% {
+    background-position: 220% 0;
+  }
+  100% {
+    background-position: -120% 0;
+  }
+}
+@keyframes luxe-ripple-out {
+  0% {
+    transform: translate(-50%, -50%) scale(0);
+    opacity: 0.6;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(28);
+    opacity: 0;
+  }
+}
+@keyframes luxe-float-y {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+@keyframes luxe-rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes luxe-slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(-24px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes luxe-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes luxe-pulse-ring {
+  0% {
+    transform: scale(0.85);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+}
+@keyframes luxe-dot {
+  0%,
+  60%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.5;
+  }
+  30% {
+    transform: translateY(-5px);
+    opacity: 1;
+  }
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  ::selection {
+    background: color-mix(in oklab, var(--luxe) 35%, transparent);
+  }
+  /* Larger touch targets on mobile */
+  @media (max-width: 767px) {
+    a,
+    button {
+      min-height: 44px;
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
