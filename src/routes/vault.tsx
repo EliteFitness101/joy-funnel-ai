@@ -49,27 +49,40 @@ function Vault() {
   }, [navigate]);
 
   if (state === "loading") {
-    return <main className="flex min-h-screen items-center justify-center text-muted-foreground">Loading vault…</main>;
+    return (
+      <main>
+        <BrandedLoader
+          messages={[
+            "Authenticating your Resonance session…",
+            "Decrypting your vault keys…",
+            "Assembling your personalised kit…",
+          ]}
+        />
+      </main>
+    );
   }
 
   if (state === "locked") {
     return (
-      <main className="flex min-h-screen items-center justify-center px-6">
-        <div className="max-w-md text-center">
-          <h1 className="text-4xl">Vault locked</h1>
-          <p className="mt-3 text-muted-foreground">
-            You need to complete payment to access your Reset Kit.
-          </p>
-          <button
-            onClick={() => navigate({ to: "/checkout" })}
-            className="mt-6 rounded-full bg-primary px-6 py-3 font-semibold text-primary-foreground"
-          >
-            Get the Kit — ₦1,000
-          </button>
+      <main className="flex min-h-screen items-center justify-center px-5 py-16">
+        <div className="w-full max-w-md">
+          <EmptyState
+            title="Vault locked"
+            body="Complete your ₦1,000 payment and your Reset Kit unlocks here instantly."
+            action={
+              <button
+                onClick={() => navigate({ to: "/checkout" })}
+                className="luxe-ripple rounded-full bg-primary px-6 py-3 font-semibold text-primary-foreground"
+              >
+                Get the Kit — ₦1,000
+              </button>
+            }
+          />
         </div>
       </main>
     );
   }
+
 
   const isPremium = data.plans.includes("premium");
 
