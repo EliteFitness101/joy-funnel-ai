@@ -1,9 +1,9 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": null,
-  "buildCommand": "bun run build",
+  "buildCommand": "bun run build:vercel",
   "installCommand": "bun install",
-  "outputDirectory": ".vercel/output",
+  
   "regions": ["fra1"],
   "github": {
     "silent": false,

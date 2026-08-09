@@ -8,7 +8,7 @@ export const Route = createFileRoute("/status")({
       { name: "description", content: "Check the verification state of your Paystack payment." },
     ],
   }),
-  validateSearch: (s: Record<string, unknown>) => ({
+  validateSearch: (s: Record<string, unknown>): { reference?: string } => ({
     reference: (s.reference as string) ?? (s.trxref as string) ?? "",
   }),
   component: StatusPage,
