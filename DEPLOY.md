@@ -11,28 +11,23 @@ Lovable editor → **GitHub** (top bar) → **Connect to GitHub** → **Create R
 
 ### b) Import the repo into Vercel
 1. https://vercel.com/new → import the new GitHub repo.
-2. **Framework Preset:** Other (Vercel will pick up `vercel.json`).
-3. **Install Command:** `bun install`
-4. **Build Command:** `bun run build` (overridden by `vercel.json`)
-5. **Output Directory:** `.vercel/output`
-6. Click **Deploy** — first build will succeed but `/api/*` routes 404 until step (c).
+2. **Framework Preset:** Other (Vercel picks up `vercel.json`).
+3. **Install Command:** `bun install` (from `vercel.json`)
+4. **Build Command:** `bun run build:vercel` (from `vercel.json`)
+5. **Output Directory:** leave empty. The build emits `.vercel/output` (Vercel Build Output API v3), which Vercel detects automatically — do **not** set an output directory.
+6. Click **Deploy**. `/api/*` routes work on the first deploy; no extra adapter package is needed.
 
-### c) Switch to the Vercel adapter (REQUIRED for `/api/*` routes)
-The Lovable preview uses a Cloudflare Workers adapter. Vercel needs its own:
+### c) How the Vercel build works (no adapter package)
+TanStack Start v1 no longer ships per-host adapters — there is **no** `@tanstack/start-adapter-vercel` package. Hosting output comes from Nitro (already a dependency):
 
-```bash
-bun add -d @tanstack/start-adapter-vercel
-```
+- `vite.config.ts` — Lovable/Cloudflare preview config. **Unchanged, do not edit.**
+- `vite.config.vercel.ts` — Vercel build config: `tsConfigPaths` + `tailwindcss` + `tanstackStart({ server: { entry: "server" } })` + `nitro({ preset: "vercel" })` + `viteReact`.
+- `package.json` → `build:vercel` = `vite build --config vite.config.vercel.ts`.
 
-Then in `package.json` change the `build` script (only when deploying to Vercel) to:
-```json
-"build": "vite build --config vite.config.vercel.ts"
-```
-Or set `VERCEL_BUILD_COMMAND` in Vercel → Project Settings → Build → **Build Command Override**:
-```
-vite build --config vite.config.vercel.ts
-```
-Push, redeploy — Vercel now emits `.vercel/output/functions/_server.func/` and every `/api/*` route works.
+The build produces `.vercel/output/functions/__server.func/` (one serverless function that serves SSR **and** every route under `src/routes/api/**`) plus static client assets, with a catch-all route `/(.*) → /__server` in `.vercel/output/config.json`. `src/server.ts` (the branded SSR error wrapper) stays the server entry on both hosts.
+
+Verified reachable on the Vercel build output: `/api/checkout`, `/api/verify`, `/api/vault`, `/api/track`, `/api/public/webhook`, `/api/public/paystack-webhook`.
+
 
 ### d) Domain
 Vercel → Project → **Settings → Domains** → add `reset.resofit.fit`. Add the CNAME at your DNS provider:
