@@ -149,8 +149,8 @@ The `Smoke test (production)` job in
 
 1. Waits 90s for Vercel to finish building.
 2. `POST https://reset.resofit.fit/api/checkout` with a junk body.
-3. Asserts the response is **not 404** (which would mean the Vercel adapter
-   is misconfigured) and **not 5xx**. A 400 / 429 = healthy.
+3. Asserts the response is **not 404** (which would mean the Nitro `vercel`
+   preset output was not picked up) and **not 5xx**. A 400 / 429 = healthy.
 4. Pings make.com with the smoke-test result (also HMAC-signed).
 
 To run it manually: GitHub → Actions → **Deploy Notify + Smoke Test** →
