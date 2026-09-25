@@ -80,6 +80,9 @@ export function captureAttributionFromUrl() {
   }
 
   const ref = url.searchParams.get("ref");
+  if (ref) {
+    try { localStorage.setItem(REF_KEY, ref.slice(0, 128)); } catch { /* quota */ }
+  }
   const sessionId = getSessionId();
   saveSession({
     ...stored,
