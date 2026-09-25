@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { getAttribution, loadSession, saveSession, track } from "@/lib/funnel";
+import { captureAttributionFromUrl, getAttribution, loadSession, saveSession, track } from "@/lib/funnel";
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({
@@ -21,7 +21,7 @@ function Checkout() {
   useEffect(() => {
     const s = loadSession();
     if (s.email) setEmail(s.email);
-    captureAttribution();
+    captureAttributionFromUrl();
     track("checkout_start", { plan: "reset", sku: "res-dig-reset" });
   }, []);
 
@@ -94,16 +94,3 @@ function Checkout() {
   );
 }
 
-function captureAttribution() {
-  // Lazy import-free wrapper keeps the route's existing funnel contract explicit.
-  const url = new URL(window.location.href);
-  const keys = ["rsid", "ttclid", "funnel_origin", "utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_content"];
-  const current = loadSession();
-  const patch: Record<string, string> = {};
-  for (const key of keys) {
-    const value = url.searchParams.get(key);
-    if (value) patch[key] = value.slice(0, 255);
-  }
-  if (Object.keys(patch).length) saveSession(patch);
-  void current;
-}
