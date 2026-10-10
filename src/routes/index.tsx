@@ -108,8 +108,8 @@ function Landing() {
       <section className="border-y border-border bg-card/40">
         <div className="mx-auto max-w-6xl px-5 py-12 sm:px-6">
           <div className="grid gap-8 md:grid-cols-3">
-            <Stat n="2,400+" l="Resets delivered" />
-            <Stat n="7 days" l="Visible results" />
+            <Stat n="7 days" l="Guided reset plan" />
+            <Stat n="10 min" l="Home workout sessions" />
             <Stat n="₦1,000" l="One-time payment" />
           </div>
         </div>
