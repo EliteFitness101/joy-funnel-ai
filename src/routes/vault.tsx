@@ -105,7 +105,7 @@ function Vault() {
         </p>
 
         <section className="mt-10 grid gap-4">
-          <VaultItem title="ResoFlex 7-Day Reset Kit (PDF)" sub="Core program guide" href="#kit" />
+          <VaultItem title="7-Day Reset Guide" sub="Your daily reset rhythm" href="#kit" />
           <VaultItem title="Nigerian Fat-Loss Meal Plan" sub="Jollof-friendly weekly meals" href="#meals" />
           <VaultItem title="10-Minute Home Workouts" sub="No equipment needed" href="#workouts" />
           <VaultItem title="Daily Checklist" sub="Print or save to phone" href="#checklist" />
