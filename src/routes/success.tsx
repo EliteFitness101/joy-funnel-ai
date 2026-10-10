@@ -20,8 +20,8 @@ function Success() {
 
   const steps = [
     "Authenticating Paystack charge ID…",
-    "Cross-referencing Maria profile credentials…",
-    "Decrypting biometric blueprint…",
+    "Confirming your Reset Kit order…",
+    "Preparing your Reset Kit access…",
     "Provisioning vault access…",
   ];
 
@@ -57,10 +57,6 @@ function Success() {
             track("payment_success", { plan: j.plan, reference: ref });
             clearInterval(stepTimer);
             setStatus("ok");
-            // Auto-redirect to external dashboard after reveal
-            setTimeout(() => {
-              window.location.href = "https://reso-dash.lovable.app";
-            }, 6000);
             return;
           }
         } catch {}
@@ -134,7 +130,7 @@ function ValidatingPanel({
       </div>
 
       <h1 className="mt-6 text-3xl md:text-4xl">
-        Maria — <span style={{ color: GOLD }}>Credentials Checked &amp; Validated</span>
+        Checking your payment — <span style={{ color: GOLD }}>secure validation in progress</span>
       </h1>
       <p className="mt-2 text-sm text-neutral-400">
         Reference:{" "}
@@ -181,182 +177,57 @@ function ValidatingPanel({
 
 function SuccessPanel({ reference }: { reference: string }) {
   return (
-    <div className="space-y-10">
-      {/* Header */}
-      <div>
-        <span
-          className="inline-block rounded-full px-3 py-1 text-xs font-semibold"
-          style={{ background: `${GOLD}20`, color: GOLD }}
-        >
-          ✓ Charge verified
-        </span>
-        <h1 className="mt-5 text-4xl md:text-5xl">
-          Welcome, <span style={{ color: GOLD }}>Maria</span>.
-        </h1>
-        <p className="mt-2 text-sm text-neutral-400">
-          Reference <code style={{ color: GOLD }}>{reference}</code>
-        </p>
-      </div>
-
-      {/* Biometric configuration card */}
+    <div className="space-y-8">
       <section
-        className="rounded-3xl border bg-neutral-950 p-8 shadow-2xl"
-        style={{ borderColor: `${GOLD}66` }}
+        className="rounded-3xl border bg-neutral-950/80 p-6 shadow-2xl sm:p-10"
+        style={{ borderColor: "rgba(212,175,55,.4)" }}
       >
-        <div className="text-[10px] uppercase tracking-[0.4em]" style={{ color: GOLD }}>
-          Personalized Biometric Configuration
-        </div>
-        <h2 className="mt-2 text-2xl md:text-3xl">Your blueprint is live</h2>
-
-        <div className="mt-6 grid gap-4 md:grid-cols-2">
-          <div
-            className="rounded-2xl border p-5"
-            style={{ borderColor: `${GOLD}33`, background: "#0a0a0a" }}
-          >
-            <div className="text-xs uppercase tracking-widest text-neutral-500">
-              Target Vectors
-            </div>
-            <div className="mt-2 text-lg" style={{ color: GOLD }}>
-              Tummy Flatness &amp; Lean Arms
-            </div>
-          </div>
-          <div
-            className="rounded-2xl border p-5"
-            style={{ borderColor: `${GOLD}33`, background: "#0a0a0a" }}
-          >
-            <div className="text-xs uppercase tracking-widest text-neutral-500">Protocol</div>
-            <div className="mt-2 text-lg text-neutral-100">7-Day Reset · Tier I</div>
-          </div>
-        </div>
-
-        {/* Allergy alert */}
-        <div
-          role="alert"
-          className="mt-6 flex items-start gap-3 rounded-2xl border-l-4 px-5 py-4"
-          style={{
-            borderColor: GOLD,
-            background: `${GOLD}10`,
-          }}
+        <span
+          className="inline-flex rounded-full px-3 py-1 text-xs font-semibold"
+          style={{ background: "rgba(212,175,55,.12)", color: GOLD }}
         >
-          <span className="text-xl leading-none" style={{ color: GOLD }}>
-            ⚠
-          </span>
-          <div>
-            <div className="text-xs uppercase tracking-widest" style={{ color: GOLD }}>
-              Strict Dietary Lock
-            </div>
-            <div className="mt-1 font-semibold text-neutral-100">
-              Strictly No Onions (Allergy Blueprint Activated)
-            </div>
-          </div>
-        </div>
+          ✓ Paystack charge verified
+        </span>
+        <h1 className="mt-5 text-3xl sm:text-4xl md:text-5xl">
+          Your <span style={{ color: GOLD }}>7-Day Reset Kit</span> is ready.
+        </h1>
+        <p className="mt-3 text-sm leading-6 text-neutral-300">
+          Your payment reference has been verified. Open your ResoFlex vault to continue.
+        </p>
+        <p className="mt-4 break-all text-xs text-neutral-500">
+          Reference: <code style={{ color: GOLD }}>{reference}</code>
+        </p>
       </section>
-
-      {/* Upsell / Cross-sell */}
-      <section>
-        <div className="mb-5 flex items-end justify-between">
-          <h2 className="text-2xl md:text-3xl">
-            Stack <span style={{ color: GOLD }}>your edge</span>
-          </h2>
-          <span className="text-[10px] uppercase tracking-[0.35em] text-neutral-500">
-            Upsell · Cross-sell
-          </span>
-        </div>
-
-        {/* Hyper-Tone Stack action card */}
-        <a
-          href="https://paystack.shop/bodybuilding"
-          target="_blank"
-          rel="noopener noreferrer"
-          onClick={() => track("upsell_click", { plan: "hyper-tone-stack" })}
-          className="group relative block overflow-hidden rounded-3xl border p-8 transition hover:-translate-y-0.5"
-          style={{
-            borderColor: GOLD,
-            background:
-              "linear-gradient(135deg, #0a0a0a 0%, #161616 60%, rgba(212,175,55,0.18) 100%)",
-          }}
-        >
+      <section className="grid gap-3 sm:grid-cols-2" aria-label="Included with the Reset Kit">
+        {[
+          ["01", "7-Day Reset PDF Guide"],
+          ["02", "Nigerian Meal Plan"],
+          ["03", "10-Minute Home Workouts"],
+          ["04", "Daily Checklist"],
+        ].map(([number, title]) => (
           <div
-            className="absolute -right-16 -top-16 h-48 w-48 rounded-full opacity-30 blur-3xl transition group-hover:opacity-50"
-            style={{ background: GOLD }}
-          />
-          <div className="text-[10px] uppercase tracking-[0.4em]" style={{ color: GOLD }}>
-            Featured Upgrade
+            key={number}
+            className="flex min-w-0 items-center gap-4 rounded-2xl border p-4 sm:p-5"
+            style={{ borderColor: "rgba(212,175,55,.2)", background: "linear-gradient(135deg, #111 0%, #080808 100%)" }}
+          >
+            <span className="shrink-0 font-semibold" style={{ color: GOLD }}>{number}</span>
+            <span className="min-w-0 text-sm sm:text-base">{title}</span>
           </div>
-          <h3 className="mt-3 text-3xl md:text-4xl">Accelerated Hyper-Tone Stack</h3>
-          <p className="mt-3 max-w-xl text-neutral-400">
-            Advanced resistance + thermogenic protocol engineered to compound your Reset results.
-          </p>
-          <div
-            className="mt-6 inline-flex items-center gap-2 rounded-full px-6 py-3 font-semibold text-black"
-            style={{ background: GOLD }}
-          >
-            Unlock the Stack <span aria-hidden>→</span>
-          </div>
-        </a>
-
-        {/* Split button column */}
-        <div className="mt-6 grid gap-4 md:grid-cols-2">
-          <a
-            href="https://paystack.shop/resoflex-luxe"
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={() => track("crosssell_click", { store: "resoflex-luxe" })}
-            className="group flex flex-col justify-between rounded-2xl border bg-neutral-950 p-6 transition hover:border-[color:var(--gold)]"
-            style={{ borderColor: `${GOLD}44`, ["--gold" as any]: GOLD }}
-          >
-            <div>
-              <div className="text-[10px] uppercase tracking-[0.35em]" style={{ color: GOLD }}>
-                Equipment Line
-              </div>
-              <div className="mt-2 text-xl text-neutral-100">ResoFlex Luxe</div>
-              <p className="mt-2 text-sm text-neutral-500">
-                Studio-grade gear for the at-home transformation suite.
-              </p>
-            </div>
-            <div
-              className="mt-5 inline-flex w-fit items-center gap-2 rounded-full border px-4 py-2 text-sm transition group-hover:bg-[color:var(--gold)] group-hover:text-black"
-              style={{ borderColor: GOLD, color: GOLD }}
-            >
-              Shop Luxe <span aria-hidden>→</span>
-            </div>
-          </a>
-
-          <a
-            href="https://paystack.shop/resonancefitness-store"
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={() => track("crosssell_click", { store: "resonancefitness-store" })}
-            className="group flex flex-col justify-between rounded-2xl border bg-neutral-950 p-6 transition hover:border-[color:var(--gold)]"
-            style={{ borderColor: `${GOLD}44`, ["--gold" as any]: GOLD }}
-          >
-            <div>
-              <div className="text-[10px] uppercase tracking-[0.35em]" style={{ color: GOLD }}>
-                Lifestyle Line
-              </div>
-              <div className="mt-2 text-xl text-neutral-100">Resonance Fitness Store</div>
-              <p className="mt-2 text-sm text-neutral-500">
-                Apparel, recovery & daily essentials to live the protocol.
-              </p>
-            </div>
-            <div
-              className="mt-5 inline-flex w-fit items-center gap-2 rounded-full border px-4 py-2 text-sm transition group-hover:bg-[color:var(--gold)] group-hover:text-black"
-              style={{ borderColor: GOLD, color: GOLD }}
-            >
-              Shop Lifestyle <span aria-hidden>→</span>
-            </div>
-          </a>
-        </div>
+        ))}
       </section>
-
-      {/* Vault CTA */}
-      <div className="pt-2 text-center">
+      <div className="text-center">
         <Link
           to="/vault"
-          className="inline-block rounded-full px-8 py-3 font-semibold text-black"
+          className="inline-flex min-h-12 w-full items-center justify-center rounded-full px-8 py-3 font-semibold text-black sm:w-auto"
           style={{ background: GOLD }}
         >
-          Enter your Vault →
+          Open Your Vault →
+        </Link>
+        <p className="mt-3 text-xs text-neutral-500">
+          Access is checked against your verified payment. If it is still syncing, use Payment Status.
+        </p>
+        <Link to="/status" className="mt-3 inline-block text-sm underline underline-offset-4" style={{ color: GOLD }}>
+          Check payment status
         </Link>
       </div>
     </div>
