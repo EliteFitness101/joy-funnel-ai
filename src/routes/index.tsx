@@ -3,6 +3,7 @@ import { LuxeCard, LuxeCardMeta, LuxeCardTitle } from "@/components/premium/Luxe
 import { SECTIONS, SectionIcon, ThemedSection, type SectionKey } from "@/components/premium/sections";
 import { StickyCta } from "@/components/premium/MobileNav";
 import { usePersona } from "@/hooks/usePersona";
+import { HeroVideo } from "@/components/premium/HeroVideo";
 
 export const Route = createFileRoute("/")({
   component: Landing,
@@ -80,23 +81,20 @@ function Landing() {
               )}
             </div>
 
-            <div className="relative">
-              <LuxeCard className="aspect-[4/5] !p-7 luxe-shadow">
-                <div className="flex h-full flex-col justify-between">
-                  <div>
-                    <div className="text-xs uppercase tracking-[0.25em] text-muted-foreground">
-                      Inside the Kit
-                    </div>
-                    <ul className="mt-6 space-y-4 text-lg">
-                      <KitItem n="01" t="7-Day Reset PDF Guide" />
-                      <KitItem n="02" t="Nigerian Meal Plan" />
-                      <KitItem n="03" t="10-min Home Workouts" />
-                      <KitItem n="04" t="Daily Checklist" />
-                    </ul>
-                  </div>
-                  <div className="rounded-2xl bg-primary/10 p-4 text-sm text-primary">
-                    Delivered instantly after payment.
-                  </div>
+            <div className="relative space-y-4">
+              <HeroVideo />
+              <LuxeCard className="!p-5 luxe-shadow">
+                <div className="text-xs uppercase tracking-[0.25em] text-muted-foreground">
+                  Inside the Kit
+                </div>
+                <ul className="mt-4 grid grid-cols-2 gap-3 text-sm sm:text-base">
+                  <KitItem n="01" t="7-Day Reset PDF" />
+                  <KitItem n="02" t="Nigerian Meal Plan" />
+                  <KitItem n="03" t="10-min Home Workouts" />
+                  <KitItem n="04" t="Daily Checklist" />
+                </ul>
+                <div className="mt-4 rounded-2xl bg-primary/10 p-3 text-sm text-primary">
+                  Delivered instantly after payment.
                 </div>
               </LuxeCard>
             </div>
