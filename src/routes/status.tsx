@@ -31,6 +31,7 @@ function StatusPage() {
       return;
     }
     setLoading(true);
+    setData(null);
     setChecked(false);
     try {
       const response = await fetch(`/api/verify?reference=${encodeURIComponent(ref.trim())}`);
@@ -93,7 +94,7 @@ function StatusPage() {
           )}
         </section>
 
-        <ResetMediaCarousel compact title="Your Reset, in a few moments" />
+        <ResetMediaCarousel compact collection="lifestyle" title="From market to kitchen · everyday wellness" />
 
         <p className="text-center text-xs text-muted-foreground">Need help? Keep your payment reference handy when contacting support.</p>
       </div>
