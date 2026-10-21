@@ -15,6 +15,7 @@ export const Route = createFileRoute("/vault")({
 type VaultData = {
   plans: string[];
   email?: string;
+  reference?: string;
 };
 
 function Vault() {
@@ -38,7 +39,7 @@ function Vault() {
         const r = await fetch(`/api/vault?${qs}`);
         const j = await r.json();
         if (j.verified && j.plans?.length) {
-          setData({ plans: j.plans, email });
+          setData({ plans: j.plans, email, reference: ref || undefined });
           setState("ok");
           track("vault_access", { plans: j.plans });
         } else {
@@ -136,16 +137,17 @@ function Vault() {
         <section id="meals" className="mt-6 scroll-mt-24">
           <LuxeCard>
             <LuxeCardTitle>Nigerian Meal Plan</LuxeCardTitle>
-            <LuxeCardMeta>Flexible meal ideas. Swap foods you do not tolerate and follow clinician guidance for any medical dietary requirements.</LuxeCardMeta>
+            <LuxeCardMeta>Meal schedule transcribed from the ResoFlex ₦1,000 Reset Protocol guide. Swap foods you do not tolerate and follow clinician guidance for any medical dietary requirements.</LuxeCardMeta>
+            {data.reference && <a href={`/api/meal-guide?reference=${encodeURIComponent(data.reference)}`} className="mt-4 inline-flex min-h-11 items-center justify-center rounded-full bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground">Download meal-plan PDF</a>}
             <div className="mt-5 grid gap-3 sm:grid-cols-2">
               {[
-                ["Day 1", "Oats and fruit", "Rice, beans and vegetables", "Fish or beans with plantain and greens"],
-                ["Day 2", "Eggs with whole-grain bread", "Yam with egg sauce and vegetables", "Eba or amala with vegetable soup and protein"],
-                ["Day 3", "Yogurt or soy yogurt with fruit", "Jollof rice with protein and salad", "Boiled potatoes with vegetables and eggs or beans"],
-                ["Day 4", "Moi moi with fruit", "Beans and plantain with vegetables", "Rice with sauce, vegetables and protein"],
-                ["Day 5", "Pap with moi moi or eggs", "Sweet potato with fish or beans", "Vegetable soup with a suitable swallow portion"],
-                ["Day 6", "Oats with groundnuts or seeds", "Yam porridge with vegetables", "Rice with stew, vegetables and protein"],
-                ["Day 7", "Akara with pap or fruit", "Beans, rice and vegetables", "A familiar home meal with vegetables and protein"]
+                ["Day 1", "Oatmeal with groundnuts", "Jollof rice with boiled egg", "Steamed okra and fish"],
+                ["Day 2", "Moin moin (bean cake)", "Sweet potato and vegetable medley", "Garden egg salad"],
+                ["Day 3", "Boiled yam and egg sauce", "Beans and plantain", "Clear fish broth (pepper soup)"],
+                ["Day 4", "Pap (ogi) and akara", "Rice and beans with palm-oil stew", "Boiled corn and coconut"],
+                ["Day 5", "Seasonal fruit salad", "Amala and ewedu with ponmo", "Grilled mackerel and cabbage"],
+                ["Day 6", "Whole-wheat bread and tea", "Stir-fry noodles with vegetables", "Vegetable soup (Edikaikong style)"],
+                ["Day 7", "Pancakes (flour, egg and milk)", "Sunday rice and a small chicken portion", "Light vegetable salad"]
               ].map(([day, breakfast, lunch, dinner]) => (
                 <article key={day} className="rounded-2xl border border-primary/20 bg-gradient-to-br from-card/90 to-primary/5 p-4">
                   <p className="text-xs font-semibold uppercase tracking-widest text-primary">{day}</p>
