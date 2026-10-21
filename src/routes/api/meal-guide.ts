@@ -23,6 +23,7 @@ export const Route = createFileRoute("/api/meal-guide")({
           .from("payments")
           .select("status, plan")
           .eq("reference", reference)
+          .eq("plan", "reset")
           .maybeSingle();
 
         if (error || !payment || payment.status !== "success") {
