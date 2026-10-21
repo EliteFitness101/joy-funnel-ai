@@ -71,7 +71,7 @@ function Upgrade() {
               <span className="rounded-full border border-border bg-card/70 px-3 py-2 text-xs text-muted-foreground">Practical meals</span>
             </div>
           </div>
-          <ResetMediaCarousel compact title="Preview the Reset experience" />
+          <ResetMediaCarousel compact collection="premium" title="Premium offers · video previews" />
         </section>
 
         <section className="luxe-card">
