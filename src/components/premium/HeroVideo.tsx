@@ -13,6 +13,7 @@ const POSTER = "/bg-hero.svg";
 export function HeroVideo() {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [armed, setArmed] = useState(false);
+  const [visible, setVisible] = useState(false);
   const [playing, setPlaying] = useState(false);
   const [muted, setMuted] = useState(true);
   const [ready, setReady] = useState(false);
@@ -27,10 +28,9 @@ export function HeroVideo() {
     const observer = new IntersectionObserver(([entry]) => {
       if (entry.isIntersecting) {
         setArmed(true);
-        if (!reduceMotion) {
-          void video.play().then(() => setPlaying(true)).catch(() => setPlaying(false));
-        }
+        setVisible(true);
       } else {
+        setVisible(false);
         video.pause();
         setPlaying(false);
       }
@@ -38,6 +38,15 @@ export function HeroVideo() {
     observer.observe(video);
     return () => observer.disconnect();
   }, [reduceMotion]);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video || !armed || !visible) return;
+    video.load();
+    if (!reduceMotion) {
+      void video.play().then(() => setPlaying(true)).catch(() => setPlaying(false));
+    }
+  }, [armed, visible, reduceMotion]);
 
   const togglePlayback = () => {
     const video = videoRef.current;
